@@ -11,7 +11,7 @@ class ReadLightNovels extends models_1.LightNovelParser {
     constructor() {
         super(...arguments);
         this.name = 'Read Light Novels';
-        this.baseUrl = 'https://readlightnovels.net';
+        this.baseUrl = 'https://animedaily.net';
         this.logo = 'https://i.imgur.com/RDPjbc6.png';
         this.classPath = 'LIGHT_NOVELS.ReadLightNovels';
         /**
