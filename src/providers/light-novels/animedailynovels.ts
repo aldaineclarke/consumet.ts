@@ -69,6 +69,14 @@ class AnimeDailyNovels extends LightNovelParser {
       lightNovelInfo.views = parseInt(
         $('div.col-xs-12.col-sm-4.col-md-4.info-holder > div.info > div:nth-child(4) > span').text()
       );
+      // The chapters are laid out right to left with two elements with last-list class this should ensure we get the correct final chapter
+      var lastChapters = $('div#new-chapter.col-xs-12 > div:nth-child(2) > div > ul > li.last-list').get();
+      if(lastChapters.length > 1){
+        lightNovelInfo.lastChapters = $('div#new-chapter.col-xs-12 > div:nth-child(2) > div > ul > li.last-list.chap-right5 > a').attr()?.title;
+      }else{
+        lightNovelInfo.lastChapters = $('div#new-chapter.col-xs-12 > div:nth-child(2) > div > ul > li:last-of-type > a').attr()?.title;
+      }
+
       lightNovelInfo.description = $('div.col-xs-12.col-sm-8.col-md-8.desc > div.desc-text > hr')
         .eq(0)
         .nextUntil('hr')
@@ -100,6 +108,7 @@ class AnimeDailyNovels extends LightNovelParser {
         lightNovelInfo.chapters = await this.fetchChapters(novelId, chapterPage, lightNovelUrl);
       }  
       return lightNovelInfo;
+
     } catch (err) {
       throw new Error((err as Error).message);
     }

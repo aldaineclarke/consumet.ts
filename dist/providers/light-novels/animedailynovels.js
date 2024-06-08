@@ -20,7 +20,7 @@ class AnimeDailyNovels extends models_1.LightNovelParser {
          * @param chapterPage chapter page number (optional) if not provided, will fetch all chapter pages.
          */
         this.fetchLightNovelInfo = async (lightNovelUrl, chapterPage = -1) => {
-            var _a, _b;
+            var _a, _b, _c, _d;
             if (!lightNovelUrl.startsWith(this.baseUrl)) {
                 lightNovelUrl = `${this.baseUrl}/${lightNovelUrl}.html`;
             }
@@ -46,6 +46,14 @@ class AnimeDailyNovels extends models_1.LightNovelParser {
                 const val = $('div.col-xs-12.col-sm-8.col-md-8.desc > div:nth-child(3) > div > span:nth-of-type(1)').text();
                 lightNovelInfo.rating = parseFloat(val);
                 lightNovelInfo.views = parseInt($('div.col-xs-12.col-sm-4.col-md-4.info-holder > div.info > div:nth-child(4) > span').text());
+                // The chapters are laid out right to left with two elements with last-list class this should ensure we get the correct final chapter
+                var lastChapters = $('div#new-chapter.col-xs-12 > div:nth-child(2) > div > ul > li.last-list').get();
+                if (lastChapters.length > 1) {
+                    lightNovelInfo.lastChapters = (_c = $('div#new-chapter.col-xs-12 > div:nth-child(2) > div > ul > li.last-list.chap-right5 > a').attr()) === null || _c === void 0 ? void 0 : _c.title;
+                }
+                else {
+                    lightNovelInfo.lastChapters = (_d = $('div#new-chapter.col-xs-12 > div:nth-child(2) > div > ul > li:last-of-type > a').attr()) === null || _d === void 0 ? void 0 : _d.title;
+                }
                 lightNovelInfo.description = $('div.col-xs-12.col-sm-8.col-md-8.desc > div.desc-text > hr')
                     .eq(0)
                     .nextUntil('hr')
