@@ -72,9 +72,9 @@ class AnimeDailyNovels extends LightNovelParser {
       // The chapters are laid out right to left with two elements with last-list class this should ensure we get the correct final chapter
       var lastChapters = $('div#new-chapter.col-xs-12 > div:nth-child(2) > div > ul > li.last-list').get();
       if(lastChapters.length > 1){
-        lightNovelInfo.lastChapters = $('div#new-chapter.col-xs-12 > div:nth-child(2) > div > ul > li.last-list.chap-right5 > a').attr()?.title;
+        lightNovelInfo.lastChapter = $('div#new-chapter.col-xs-12 > div:nth-child(2) > div > ul > li.last-list.chap-right5 > a').attr()?.title;
       }else{
-        lightNovelInfo.lastChapters = $('div#new-chapter.col-xs-12 > div:nth-child(2) > div > ul > li:last-of-type > a').attr()?.title;
+        lightNovelInfo.lastChapter = $('div#new-chapter.col-xs-12 > div:nth-child(2) > div > ul > li:last-of-type > a').attr()?.title;
       }
 
       lightNovelInfo.description = $('div.col-xs-12.col-sm-8.col-md-8.desc > div.desc-text > hr')
