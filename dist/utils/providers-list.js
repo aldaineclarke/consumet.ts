@@ -34,7 +34,7 @@ exports.PROVIDERS_LIST = {
     ],
     BOOKS: [new providers_1.BOOKS.Libgen()],
     COMICS: [new providers_1.COMICS.GetComics()],
-    LIGHT_NOVELS: [new providers_1.LIGHT_NOVELS.ReadLightNovels()],
+    LIGHT_NOVELS: [new providers_1.LIGHT_NOVELS.AnimeDailyNovels()],
     MOVIES: [
         new providers_1.MOVIES.DramaCool(),
         new providers_1.MOVIES.FlixHQ(),

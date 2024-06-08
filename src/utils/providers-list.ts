@@ -32,7 +32,7 @@ export const PROVIDERS_LIST = {
   ],
   BOOKS: [new BOOKS.Libgen()],
   COMICS: [new COMICS.GetComics()],
-  LIGHT_NOVELS: [new LIGHT_NOVELS.ReadLightNovels()],
+  LIGHT_NOVELS: [new LIGHT_NOVELS.AnimeDailyNovels()],
   MOVIES: [
     new MOVIES.DramaCool(),
     new MOVIES.FlixHQ(),

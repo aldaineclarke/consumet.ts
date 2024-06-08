@@ -12,12 +12,12 @@ import {
 } from '../../models';
 import { USER_AGENT } from '../../utils';
 
-class ReadLightNovels extends LightNovelParser {
+class AnimeDailyNovels extends LightNovelParser {
   override readonly name = 'Read Light Novels';
   protected override baseUrl = 'https://animedaily.net';
 
   protected override logo = 'https://i.imgur.com/RDPjbc6.png';
-  protected override classPath = 'LIGHT_NOVELS.ReadLightNovels';
+  protected override classPath = 'LIGHT_NOVELS.AnimeDailyNovels';
 
   /**
    *
@@ -52,17 +52,19 @@ class ReadLightNovels extends LightNovelParser {
         'src'
       );
       lightNovelInfo.author = $(
-        'div.col-xs-12.col-sm-4.col-md-4.info-holder > div.info > div:nth-child(1) > a'
+        'div.col-xs-12.col-sm-4.col-md-4.info-holder > div.info > div:nth-child(1)  a'
       ).text();
       lightNovelInfo.genres = $(
-        ' div.col-xs-12.col-sm-4.col-md-4.info-holder > div.info > div:nth-child(2) > a'
+        ' div.col-xs-12.col-sm-4.col-md-4.info-holder > div.info > div:nth-child(2)  a'
       )
         .map((i, el) => $(el).text())
         .get();
+
+      const val  = $(
+        'div.col-xs-12.col-sm-8.col-md-8.desc > div:nth-child(3) > div > span:nth-of-type(1)'
+      ).text();
       lightNovelInfo.rating = parseFloat(
-        $(
-          'div.col-xs-12.col-sm-8.col-md-8.desc > div.rate > div.small > em > strong:nth-child(1) > span'
-        ).text()
+        val
       );
       lightNovelInfo.views = parseInt(
         $('div.col-xs-12.col-sm-4.col-md-4.info-holder > div.info > div:nth-child(4) > span').text()
@@ -78,7 +80,7 @@ class ReadLightNovels extends LightNovelParser {
           .filter(x => !isNaN(x))
       );
 
-      switch ($('div.col-xs-12.col-sm-4.col-md-4.info-holder > div.info > div:nth-child(3) > span').text()) {
+      switch ($('div.col-xs-12.col-sm-4.col-md-4.info-holder > div.info > div:last-child > span').text()) {
         case 'Completed':
           lightNovelInfo.status = MediaStatus.COMPLETED;
           break;
@@ -96,8 +98,7 @@ class ReadLightNovels extends LightNovelParser {
         lightNovelInfo.chapters = await this.fetchAllChapters(novelId, pages, lightNovelUrl);
       } else {
         lightNovelInfo.chapters = await this.fetchChapters(novelId, chapterPage, lightNovelUrl);
-      }
-
+      }  
       return lightNovelInfo;
     } catch (err) {
       throw new Error((err as Error).message);
@@ -194,12 +195,13 @@ class ReadLightNovels extends LightNovelParser {
       const $ = load(res.data);
 
       $(
-        'div.col-xs-12.col-sm-12.col-md-9.col-truyen-main > div:nth-child(1) > div > div:nth-child(2) > div.col-md-3.col-sm-6.col-xs-6.home-truyendecu'
+        'div.col-xs-12.col-sm-12.col-md-9.col-truyen-main > div:nth-child(1) > div > div:nth-child(1)  div.col-md-3.col-sm-6.col-xs-6.home-truyendecu'
       ).each((i, el) => {
         result.results.push({
           id: $(el).find('a').attr('href')?.split('/')[3]!.replace('.html', '')!,
           title: $(el).find('a > div > h3').text(),
           url: $(el).find('a').attr('href')!,
+          genres: $(el).find('div.chuyen-muc').attr()!.title.split(","),
           image: $(el).find('a > img').attr('src'),
         });
       });
@@ -209,12 +211,61 @@ class ReadLightNovels extends LightNovelParser {
       throw new Error((err as Error).message);
     }
   };
+  /**
+   * @description This method fetches the different list of novels by accepting the list you wish to fetch then returning the list of light novels in that list
+   * @param novelList Novel list to fetch
+   */
+  fetchNovelList = async (novelList: NovelListType | string): Promise<ISearch<ILightNovelResult>> => {
+    const result: ISearch<ILightNovelResult> = { results: [] };
+    const searchType = novelList.replace(" ", "-").toLocaleLowerCase();
+    try {
+      const res = await this.client.post(`${this.baseUrl}/${searchType}`);
+      const $ = load(res.data);
+
+      $(
+        'div.col-xs-12.col-sm-12.col-md-9.col-truyen-main > div:nth-child(1) > div > div:nth-child(1)  div.col-md-3.col-sm-6.col-xs-6.home-truyendecu'
+      ).each((i, el) => {
+
+        result.results.push({
+          id: $(el).find('a').attr('href')?.split('/')[3]!.replace('.html', '')!,
+          title: $(el).find('a > div > h3').text(),
+          url: $(el).find('a').attr('href')!,
+          genres: $(el).find('div.chuyen-muc').attr()!.title?.split(","),
+          image: $(el).find('a > img').attr('src'),
+        });
+      });
+      return result;
+    } catch (err) {
+      throw new Error((err as Error).message);
+    }
+  };
+  /**
+   * @description This method fetches the different list of novels by accepting the list you wish to fetch then returning the list of light novels in that list
+   * @param novelList Novel list to fetch
+   */
+  fetchGenreList = async (pageWithGenre = "front"): Promise<{results: Array<String>}> => {
+    const result: {results:string[]}= { results: [] };
+    try {
+      const res = await this.client.post(`${this.baseUrl}/${pageWithGenre}`);
+      const $ = load(res.data);
+
+      $(
+        'div.col-md-4.col-truyen-side > div:nth-child(1) > div:nth-child(2)  .index-cate'
+      ).each((i, el) => {
+        result.results.push($(el).find('a').attr()!.title);
+      });
+      return result;
+    } catch (err) {
+      throw new Error((err as Error).message);
+    }
+  };
 }
 
-export default ReadLightNovels;
+type NovelListType="latest-release" | "complete-novels" | "complete-novels" | "most-popular" | "front";
+
+export default AnimeDailyNovels;
 
 // (async () => {
 //   const ln = new ReadLightNovels();
 //   const chap = await ln.fetchChapterContent('youkoso-jitsuryoku-shijou-shugi-no-kyoushitsu-e/volume-1-prologue-the-structure-of-japanese-society');
-//   console.log(chap);
 // })();
