@@ -242,6 +242,7 @@ class AnimeDailyNovels extends LightNovelParser {
           // if only one genre is on the novel it will not have the genre in the parent title attribute.
           genres: $(el).find('div.chuyen-muc').attr()!.title?.split(",") ?? $(el).find('div.chuyen-muc a').attr()!.title?.split(","),
           image: $(el).find('a > img').attr('src'),
+          lastChapter: $(el).find('div.tt-status  span.chapter-name').attr("title"),
         });
       });
       return result;
