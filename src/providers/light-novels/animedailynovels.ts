@@ -226,9 +226,9 @@ class AnimeDailyNovels extends LightNovelParser {
    */
   fetchNovelList = async (novelList: NovelListType | string): Promise<ISearch<ILightNovelResult>> => {
     const result: ISearch<ILightNovelResult> = { results: [] };
-    const searchType = novelList.replace(" ", "-").toLocaleLowerCase();
+    const searchType = novelList.replace(" ", "-").toLocaleLowerCase() ?? 'latest-release';
     try {
-      const res = await this.client.post(`${this.baseUrl}/${searchType}`);
+      const res = await this.client.get(`${this.baseUrl}/${searchType}`);
       const $ = load(res.data);
 
       $(
@@ -237,9 +237,10 @@ class AnimeDailyNovels extends LightNovelParser {
 
         result.results.push({
           id: $(el).find('a').attr('href')?.split('/')[3]!.replace('.html', '')!,
-          title: $(el).find('a > div > h3').text(),
+          title: $(el).find('div.caption > a  h3').text(),
           url: $(el).find('a').attr('href')!,
-          genres: $(el).find('div.chuyen-muc').attr()!.title?.split(","),
+          // if only one genre is on the novel it will not have the genre in the parent title attribute.
+          genres: $(el).find('div.chuyen-muc').attr()!.title?.split(",") ?? $(el).find('div.chuyen-muc a').attr()!.title?.split(","),
           image: $(el).find('a > img').attr('src'),
         });
       });

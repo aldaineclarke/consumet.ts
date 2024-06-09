@@ -185,18 +185,20 @@ class AnimeDailyNovels extends models_1.LightNovelParser {
          * @param novelList Novel list to fetch
          */
         this.fetchNovelList = async (novelList) => {
+            var _a;
             const result = { results: [] };
-            const searchType = novelList.replace(" ", "-").toLocaleLowerCase();
+            const searchType = (_a = novelList.replace(" ", "-").toLocaleLowerCase()) !== null && _a !== void 0 ? _a : 'latest-release';
             try {
-                const res = await this.client.post(`${this.baseUrl}/${searchType}`);
+                const res = await this.client.get(`${this.baseUrl}/${searchType}`);
                 const $ = (0, cheerio_1.load)(res.data);
                 $('div.col-xs-12.col-sm-12.col-md-9.col-truyen-main > div:nth-child(1) > div > div:nth-child(1)  div.col-md-3.col-sm-6.col-xs-6.home-truyendecu').each((i, el) => {
-                    var _a, _b;
+                    var _a, _b, _c, _d;
                     result.results.push({
                         id: (_a = $(el).find('a').attr('href')) === null || _a === void 0 ? void 0 : _a.split('/')[3].replace('.html', ''),
-                        title: $(el).find('a > div > h3').text(),
+                        title: $(el).find('div.caption > a  h3').text(),
                         url: $(el).find('a').attr('href'),
-                        genres: (_b = $(el).find('div.chuyen-muc').attr().title) === null || _b === void 0 ? void 0 : _b.split(","),
+                        // if only one genre is on the novel it will not have the genre in the parent title attribute.
+                        genres: (_c = (_b = $(el).find('div.chuyen-muc').attr().title) === null || _b === void 0 ? void 0 : _b.split(",")) !== null && _c !== void 0 ? _c : (_d = $(el).find('div.chuyen-muc a').attr().title) === null || _d === void 0 ? void 0 : _d.split(","),
                         image: $(el).find('a > img').attr('src'),
                     });
                 });

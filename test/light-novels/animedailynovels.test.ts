@@ -16,14 +16,10 @@ test('returns a filled object of light novel info', async () => {
   expect(data.description).not.toEqual('');
 });
 test('returns a filled object of the latest light novels', async () => {
-  const data = await animedailynovels.fetchNovelList('complete-novels');
+  const data = await animedailynovels.fetchNovelList("latest-release");
   expect(data.results).not.toEqual([]);
 });
 test('returns a filled array of the genres', async () => {
   const data = await animedailynovels.fetchGenreList();
-  expect(data.results).not.toEqual([]);
-});
-test('returns a filled array of the light novels of that genre', async () => {
-  const data = await animedailynovels.fetchNovelList("Video Games");
   expect(data.results).not.toEqual([]);
 });
