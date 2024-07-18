@@ -19,7 +19,6 @@
         "test:news": "jest ./test/news",
         "test:meta": "jest ./test/meta"
     },
-
     "files": [
         "dist"
     ],
@@ -54,7 +53,8 @@
         "axios": "^0.27.2",
         "cheerio": "^1.0.0-rc.12",
         "crypto-js": "^4.1.1",
-        "form-data": "^4.0.0"
+        "form-data": "^4.0.0",
+        "puppeteer": "^22.12.0"
     },
     "devDependencies": {
         "@commitlint/cli": "^17.6.3",

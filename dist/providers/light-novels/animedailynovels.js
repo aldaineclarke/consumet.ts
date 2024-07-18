@@ -126,6 +126,14 @@ class AnimeDailyNovels extends models_1.LightNovelParser {
             }
             return chapters;
         };
+        this.fetchChapterBy = async (novelId, pages, referer) => {
+            const chapters = [];
+            for (const pageNumber of Array.from({ length: pages }, (_, i) => i + 1)) {
+                const chaptersPage = await this.fetchChapters(novelId, pageNumber, referer);
+                chapters.push(...chaptersPage);
+            }
+            return chapters;
+        };
         /**
          *
          * @param chapterId chapter id or url
@@ -159,21 +167,25 @@ class AnimeDailyNovels extends models_1.LightNovelParser {
          *
          * @param query search query string
          */
-        this.search = async (query) => {
+        this.search = async (query, page) => {
             const result = { results: [] };
             try {
-                const res = await this.client.post(`${this.baseUrl}/?s=${query}`);
+                const res = await this.client.post(`${this.baseUrl}/page/${page !== null && page !== void 0 ? page : 1}?s=${query}`);
                 const $ = (0, cheerio_1.load)(res.data);
                 $('div.col-xs-12.col-sm-12.col-md-9.col-truyen-main > div:nth-child(1) > div > div:nth-child(1)  div.col-md-3.col-sm-6.col-xs-6.home-truyendecu').each((i, el) => {
-                    var _a;
+                    var _a, _b, _c, _d, _e;
                     result.results.push({
                         id: (_a = $(el).find('a').attr('href')) === null || _a === void 0 ? void 0 : _a.split('/')[3].replace('.html', ''),
-                        title: $(el).find('a > div > h3').text(),
+                        title: $(el).find('a > h3').text(),
                         url: $(el).find('a').attr('href'),
-                        genres: $(el).find('div.chuyen-muc').attr().title.split(","),
+                        genres: (_c = (_b = $(el).find('div.chuyen-muc').attr()) === null || _b === void 0 ? void 0 : _b.title) === null || _c === void 0 ? void 0 : _c.split(","),
                         image: $(el).find('a > img').attr('src'),
+                        lastChapter: (_d = $(el).find('.chapter-name').attr()) === null || _d === void 0 ? void 0 : _d.title,
+                        status: ((_e = $(el).find('small > span.hoan-thanh').text()) === null || _e === void 0 ? void 0 : _e.toLocaleLowerCase()) == "full" ? models_1.MediaStatus.COMPLETED : models_1.MediaStatus.ONGOING
                     });
                 });
+                console.log(result);
+                // have a check to see if the pagination exists before allowing to fetch other pages
                 return result;
             }
             catch (err) {
@@ -184,12 +196,12 @@ class AnimeDailyNovels extends models_1.LightNovelParser {
          * @description This method fetches the different list of novels by accepting the list you wish to fetch then returning the list of light novels in that list
          * @param novelList Novel list to fetch
          */
-        this.fetchNovelList = async (novelList) => {
+        this.fetchNovelList = async (novelList, page) => {
             var _a;
             const result = { results: [] };
             const searchType = (_a = novelList.replace(" ", "-").toLocaleLowerCase()) !== null && _a !== void 0 ? _a : 'latest-release';
             try {
-                const res = await this.client.get(`${this.baseUrl}/${searchType}`);
+                const res = await this.client.get(`${this.baseUrl}/${searchType}/page/${page}`);
                 const $ = (0, cheerio_1.load)(res.data);
                 $('div.col-xs-12.col-sm-12.col-md-9.col-truyen-main > div:nth-child(1) > div > div:nth-child(1)  div.col-md-3.col-sm-6.col-xs-6.home-truyendecu').each((i, el) => {
                     var _a, _b, _c, _d;

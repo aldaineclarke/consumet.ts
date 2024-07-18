@@ -11,7 +11,6 @@ import {
   MediaStatus,
 } from '../../models';
 import { USER_AGENT } from '../../utils';
-
 class AnimeDailyNovels extends LightNovelParser {
   override readonly name = 'Read Light Novels';
   protected override baseUrl = 'https://animedaily.net';
@@ -113,6 +112,7 @@ class AnimeDailyNovels extends LightNovelParser {
       throw new Error((err as Error).message);
     }
   };
+  
   private fetchChapters = async (
     novelId: number,
     chapterPage: number,
@@ -161,6 +161,16 @@ class AnimeDailyNovels extends LightNovelParser {
     return chapters;
   };
 
+  private fetchChapterBy = async (novelId: number, pages: number, referer: string): Promise<any> => {
+    const chapters: ILightNovelChapter[] = [];
+
+    for (const pageNumber of Array.from({ length: pages }, (_, i) => i + 1)) {
+      const chaptersPage = await this.fetchChapters(novelId, pageNumber, referer);
+      chapters.push(...chaptersPage);
+    }
+    return chapters;
+  };
+
   /**
    *
    * @param chapterId chapter id or url
@@ -186,7 +196,6 @@ class AnimeDailyNovels extends LightNovelParser {
           contents.text += `${$(line).text()}\n`;
         }
       }
-
       return contents;
     } catch (err) {
       throw new Error((err as Error).message);
@@ -197,10 +206,10 @@ class AnimeDailyNovels extends LightNovelParser {
    *
    * @param query search query string
    */
-  override search = async (query: string): Promise<ISearch<ILightNovelResult>> => {
+  override search = async (query: string, page?:number): Promise<ISearch<ILightNovelResult>> => {
     const result: ISearch<ILightNovelResult> = { results: [] };
     try {
-      const res = await this.client.post(`${this.baseUrl}/?s=${query}`);
+      const res = await this.client.post(`${this.baseUrl}/page/${page ?? 1}?s=${query}`);
       const $ = load(res.data);
 
       $(
@@ -208,15 +217,18 @@ class AnimeDailyNovels extends LightNovelParser {
       ).each((i, el) => {
         result.results.push({
           id: $(el).find('a').attr('href')?.split('/')[3]!.replace('.html', '')!,
-          title: $(el).find('a > div > h3').text(),
+          title: $(el).find('a > h3').text(),
           url: $(el).find('a').attr('href')!,
-          genres: $(el).find('div.chuyen-muc').attr()!.title.split(","),
+          genres: $(el).find('div.chuyen-muc').attr()?.title?.split(","),
           image: $(el).find('a > img').attr('src'),
+          lastChapter: $(el).find('.chapter-name').attr()?.title,
+          status: $(el).find('small > span.hoan-thanh').text()?.toLocaleLowerCase() == "full" ? MediaStatus.COMPLETED : MediaStatus.ONGOING
         });
       });
-
+      // have a check to see if the pagination exists before allowing to fetch other pages
       return result;
     } catch (err) {
+      
       throw new Error((err as Error).message);
     }
   };
@@ -224,11 +236,11 @@ class AnimeDailyNovels extends LightNovelParser {
    * @description This method fetches the different list of novels by accepting the list you wish to fetch then returning the list of light novels in that list
    * @param novelList Novel list to fetch
    */
-  fetchNovelList = async (novelList: NovelListType | string): Promise<ISearch<ILightNovelResult>> => {
+  fetchNovelList = async (novelList: NovelListType | string, page: number): Promise<ISearch<ILightNovelResult>> => {
     const result: ISearch<ILightNovelResult> = { results: [] };
     const searchType = novelList.replace(" ", "-").toLocaleLowerCase() ?? 'latest-release';
     try {
-      const res = await this.client.get(`${this.baseUrl}/${searchType}`);
+      const res = await this.client.get(`${this.baseUrl}/${searchType}/page/${page}`);
       const $ = load(res.data);
 
       $(

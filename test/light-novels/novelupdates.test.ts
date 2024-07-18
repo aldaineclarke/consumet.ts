@@ -5,7 +5,7 @@ jest.setTimeout(120000);
 const novelupdates = new LIGHT_NOVELS.NovelUpdates();
 
 test('returns a filled array of light novels', async () => {
-  const data = await novelupdates.search('slime');
+  const data = await novelupdates.search('slime',3);
   expect(data.results).not.toEqual([]);
 });
 

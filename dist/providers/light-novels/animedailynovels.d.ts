@@ -12,6 +12,7 @@ declare class AnimeDailyNovels extends LightNovelParser {
     fetchLightNovelInfo: (lightNovelUrl: string, chapterPage?: number) => Promise<ILightNovelInfo>;
     private fetchChapters;
     private fetchAllChapters;
+    private fetchChapterBy;
     /**
      *
      * @param chapterId chapter id or url
@@ -21,12 +22,12 @@ declare class AnimeDailyNovels extends LightNovelParser {
      *
      * @param query search query string
      */
-    search: (query: string) => Promise<ISearch<ILightNovelResult>>;
+    search: (query: string, page?: number) => Promise<ISearch<ILightNovelResult>>;
     /**
      * @description This method fetches the different list of novels by accepting the list you wish to fetch then returning the list of light novels in that list
      * @param novelList Novel list to fetch
      */
-    fetchNovelList: (novelList: NovelListType | string) => Promise<ISearch<ILightNovelResult>>;
+    fetchNovelList: (novelList: NovelListType | string, page: number) => Promise<ISearch<ILightNovelResult>>;
     /**
      * @description This method fetches the different list of novels by accepting the list you wish to fetch then returning the list of light novels in that list
      * @param novelList Novel list to fetch
